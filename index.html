@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaaaame</title>
+</head>
+
+<body>
+    <button id="wood_gathering" onclick="Wood.increase()">Gather Wood</button>
+    <div class="main_grid" style="visibility:hidden">
+        <div class="menu">
+            <button>Buildings</button>
+            <button>Research</button>
+            <button>Religion</button>
+            <button>Exploration</button>
+            <button>The Pit</button>
+        </div>
+        <div class="resource_list">
+            <div>
+                <h2>Resources</h2>
+                <div id="resource_list">
+                </div>
+            </div>
+        </div>
+        <div class="main_zone">
+            <div>
+                <h2>Buildings</h2>
+                <div id="buildings" class="row">
+                    <!-- <div class="building_button">
+                        <p>Count</p>
+                        <button>Build Stonemason</button>
+                        <button>Automate</button>
+                    </div>
+                    <div class="building_button">
+                        <button>Build Stonemason</button>
+                        <button>Automate</button>
+                    </div>
+                    <div class="building_button">
+                        <button>Build Stonemason</button>
+                        <button>Automate</button>
+                    </div>
+                    <div class="building_button">
+                        <button>Build Stonemason</button>
+                        <button>Automate</button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="resources.js"></script>
+    <script src="recipes.js"></script>
+    <script src="buildings.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body {
+            width: 1200px;
+            margin: auto;
+            border: 1px solid grey;
+        }
+
+        .main_grid {
+            display: grid;
+            grid-template-areas:
+                "menu menu menu menu menu menu menu"
+                "resource_list main_zone main_zone main_zone main_zone main_zone main_zone";
+            grid-template-columns: 28% repeat(6, 14%);
+            
+        }
+
+        .menu {
+            grid-area: menu;
+            background-color: teal;
+            display: grid;
+            grid-template-columns: repeat(5, 20%);
+            height: 30px;
+        }
+
+        .main_zone {
+            grid-area: main_zone;
+            background-color: tomato;
+        }
+
+        .building_button {
+            display: grid;
+            grid-template-columns: 10% 70% auto;
+            padding: 1px;
+            margin: 1px;
+            border: 1px solid black;
+            background-color: teal;
+            border-radius: 7px;
+        }
+
+        .building_button p {
+            text-align: center;
+        }
+
+        .building_button button {
+            border-radius: 7px;
+        }
+
+        .resource_list {
+            grid-area: resource_list;
+            background-color: violet;
+        }
+
+        .column {
+            float: left;
+            width: 40%;
+            padding: 10px;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+        @media screen and (max-width: 600px) {
+            .column {
+                width: 100%;
+            }
+        }
+
+        #resource_list .row {
+            display: flex;
+            height: 15px;
+        }
+
+        #resource_list .row p{
+            height: 15px;
+            flex: 10%;
+        }
+        .resource_count.column {
+            text-align: right;
+            flex: auto !important;
+        }
+
+        .active {
+            color: white;
+            background-color: forestgreen;
+        }
+
+        .inactive {
+            color: white;
+            background-color: maroon;
+        }
+    </style>
+</body>
+
+</html>
