@@ -1,4 +1,4 @@
-let ALL_RECIPES = {}
+let ALL_RECIPES = new Map();
 
 class Recipe {
     constructor(name, resource, cost, cost_increase = 1.01, value = 1) {
@@ -9,29 +9,37 @@ class Recipe {
         this.value = value;
         this.building_count = 0;
         this.unlocked = false;
-        ALL_RECIPES[this.resource.name] = this;        
+        this.button_id = name.toLowerCase() + "_button";
+        this.automate_id = name.toLowerCase() + "_automate";
+        this.automated = false;
+        this.building_button = null;
+        this.building_count_element = null;
+        this.building_div = null;
+        this.automate_button = null;
+        ALL_RECIPES.set(this.name, this);
+        // ALL_RECIPES[resource] = this;
     }
 
     createBuildingButton() {
         /* 
             building
-        */        
+        */
         let resource = this.resource;
-        
+
         let building_div = document.createElement("div");
         building_div.classList.add("building_button", "column");
-        resource.building_div = building_div;
+        this.building_div = building_div;
 
         let building_count = document.createElement("p");
-        building_count.append(document.createTextNode(resource.building_count + " X"));
-        resource.building_count_element = building_count;
+        building_count.append(document.createTextNode(this.building_count + " X"));
+        this.building_count_element = building_count;
         let building_button = document.createElement("button");
-        building_button.setAttribute("id", resource.button_id);
+        building_button.setAttribute("id", this.button_id);
         building_button.addEventListener('click', () => {
             // ALL_RECIPES[resource.name].build();
             this.build();
         }, false);
-        resource.building_button = building_button;
+        this.building_button = building_button;
         building_button.append(document.createTextNode(`Build ${this.name}`));
         building_div.append(building_count);
         building_div.append(building_button);
@@ -48,7 +56,7 @@ class Recipe {
     haveResources() {
         let count = 0;
         for (let element in this.cost) {
-            if (ALL_RESOURCES[element].value >= this.cost[element]) {
+            if (ALL_RESOURCES.get(element).value >= this.cost[element]) {
                 count++;
             }
         }
@@ -66,28 +74,32 @@ class Recipe {
         }
         // this.resource.unlocked = true;
     }
-    
+
     build() {
         let count = 0;
         const recipe_resource = this.resource;
         Object.keys(this.cost).map(element => {
-            if (this.cost[element] <= ALL_RESOURCES[element].value)
+            if (this.cost[element] <= ALL_RESOURCES.get(element).value)
                 count++;
-                console.log(element);
+            console.log(element);
         });
         if (count >= Object.keys(this.cost).length) {
-            recipe_resource.unlocked = true;
-            this.building_count++;
-            recipe_resource.buildings[this.name] = this.building_count * this.value;
-            recipe_resource.updateBonuses();
-            recipe_resource.building_count++;
-            recipe_resource.building_count_element.innerHTML = recipe_resource.building_count + " X"
-            if (recipe_resource.building_count == 1) {
+            if (this.building_count < 1) {
+                this.building_count++;
+                this.createAutomationButton();
+            } else this.building_count++;
+            // recipe_resource.buildings[this.name] = this.building_count * this.value;
+            if (this.automated) {
+                this.resource.buildings[this.name] = this.building_count * this.value;
+                recipe_resource.updateBonuses();
+            }
+            this.building_count_element.innerHTML = this.building_count + " X"
+            if (!recipe_resource.unlocked) {
                 recipe_resource.createResourceCard();
-                recipe_resource.createAutomationButton();
+                recipe_resource.unlocked = true;
             }
             Object.keys(this.cost).map(element => {
-                let resource = ALL_RESOURCES[element];
+                let resource = ALL_RESOURCES.get(element);
                 console.log("this cost", this.cost[element]);
                 resource.value -= this.cost[element];
                 this.cost[element] **= this.cost_increase;
@@ -97,31 +109,70 @@ class Recipe {
             });
         }
     }
+
+    createAutomationButton() {
+        let automate_button = document.createElement("button");
+        automate_button.setAttribute("id", this.automate_id);
+        automate_button.addEventListener('click', () => {
+            this.toggleAutomation();
+        }, false);
+        this.automate_button = automate_button;
+        automate_button.append(document.createTextNode("Toggle on"))
+        this.building_div.append(automate_button);
+
+        this.toggleAutomation();
+    }
+
+    toggleAutomation() {
+        this.automated = !this.automated;
+
+        if (this.automated) {
+            this.resource.buildings[this.name] = this.building_count * this.value;
+            this.automate_button.innerHTML = "Toggle off";
+            this.automate_button.classList = "active";
+        } else {
+            this.resource.buildings[this.name] = 0;
+            this.automate_button.innerHTML = "Toggle on";
+            this.automate_button.classList = "inactive";
+        }
+        this.resource.updateBonuses();
+    }
 }
+
 Lumberjacks_Hut = new Recipe(
     "Lumberjacks Hut",
     Wood,
     cost = {
-        Wood: 9,
-    },
-    cost_increase = 1.05,
-    value=2
-)
-
-stone_recipe = new Recipe(
-    "Stonemason",
-    Stone,
-    cost={
         Wood: 15,
     },
     cost_increase = 1.05,
-    value=0.01,
+    value = 2
 )
 
-water_recipe = new Recipe(
+Wood_Cutter = new Recipe(
+    "Wood Cutter",
+    Wood,
+    cost = {
+        Wood: 6,
+    },
+    cost_increase = 1.01,
+    value = 0.5
+)
+
+Stonemason = new Recipe(
+    "Stonemason",
+    Stone,
+    cost = {
+        Wood: 15,
+    },
+    cost_increase = 1.05,
+    value = 0.01,
+)
+
+Water_Well = new Recipe(
     "Water Well",
     Water,
-    cost={
+    cost = {
         Wood: 5,
         Stone: 10,
     },
@@ -129,10 +180,10 @@ water_recipe = new Recipe(
 
 )
 
-iron_recipe = new Recipe(
+Iron_Mine = new Recipe(
     "Iron Mine",
     Iron,
-    cost={
+    cost = {
         Wood: 50,
         Stone: 15
     },

@@ -1,6 +1,5 @@
-let ALL_RESOURCES = {
+let ALL_RESOURCES = new Map();
 
-}
 class Resources {
     constructor(name, base_value = 1, value = 0, automated = false) {
         this.name = name;
@@ -11,7 +10,6 @@ class Resources {
         this.automated = automated;
         this.base_value = base_value;
         this.value = value;
-        this.building_count = 0;
         this.increase_by = 1;
         this.buildings = {};
         this.other_bonuses = {};
@@ -23,14 +21,16 @@ class Resources {
         this.title_element = null;
         this.count_element = null;
         this.unlocked = false;
-        ALL_RESOURCES[this.name] = this;
+        ALL_RESOURCES.set(this.name, this);
+        // ALL_RESOURCES[this.name] = this;
+        console.log(typeof (this));
     }
 
     createResourceCard() {
         /* 
         resource list
         */
-       
+
         let resource_title = document.createElement("p");
         resource_title.setAttribute("id", this.title_id);
         resource_title.classList.add("column");
@@ -53,22 +53,9 @@ class Resources {
 
         let resource_list = document.getElementById("resource_list");
         resource_list.append(resource_div);
-        // resource_list.append(resource_title);
-        // resource_list.append(resource_count);
 
     }
 
-    createAutomationButton() {
-        let automate_button = document.createElement("button");
-        automate_button.setAttribute("id", this.automate_id);
-        automate_button.addEventListener('click', () => {
-            this.toggleAutomation();
-        }, false);
-        this.button_element = automate_button;
-        automate_button.append(document.createTextNode("Toggle on"))
-
-        this.building_div.append(automate_button);
-    }
 
     destroyResourceCard() {
         this.automated = false;
@@ -81,58 +68,42 @@ class Resources {
     }
 
     updateCount() {
-        if (!this.count_element){
+        if (!this.count_element) {
             if (document.getElementById(this.count_id))
                 document.getElementById(this.count_id).innerHTML = this.value.toFixed(2);
             return
         }
         this.count_element.innerHTML = `${this.value.toFixed(2)} (${this.increase_by.toFixed(2)}/tick)`;
     }
-    
+
     updateBonuses() {
-        const arrSum = arr => arr.reduce((a,b) => a +b, 0);
+        const arrSum = arr => arr.reduce((a, b) => a + b, 0);
         let building_bonuses = arrSum(Object.values(this.buildings));
+        if (building_bonuses > 0) {
+            this.automated = true;
+        } else {
+            this.automated = false;
+            this.count_element.innerHTML = `${this.value.toFixed(2)}`;
+        }
         let other_bonuses = arrSum(Object.values(this.other_bonuses));
         console.log(this.base_value, building_bonuses, other_bonuses);
-        
+
         this.increase_by = (this.base_value + building_bonuses + other_bonuses) * this.multiplier;
         console.log(this.increase_by);
-        
+
     }
 
-    toggleAutomation() {
-        this.automated = !this.automated;
-        this.button_element.innerHTML = this.automated ? "Toggle off" : "Toggle on";
-        this.button_element.classList = (this.automated ? "active" : "inactive");
-    }
-
-    // build() {
-    //     let count = 0;
-    //     console.log(this.cost);
-        
-    //     Object.keys(this.cost).map(element => {
-    //         if (this.cost[element] < ALL_RESOURCES[element].value)
-    //             count++;
-    //             console.log(element);
-    //     });
-    //     if (count >= Object.keys(this.cost).length) {
-    //         Object.keys(this.cost).map(element => {
-    //             ALL_RESOURCES[element].value -= this.cost[element];
-    //             ALL_RESOURCES[element].count_element.innerHTML = ALL_RESOURCES[element].value; 
-    //             console.log(element);
-    //         });
-    //         this.building_count++;
-    //         this.building_count_element.innerHTML = this.building_count + " X"
-    //         if (this.building_count == 1) {
-    //             this.createResourceCard();
-    //             this.createAutomationButton();
-    //         }
-    //     }
+    // toggleAutomation() {
+    //     this.automated = !this.automated;
+    //     this.automate_button.innerHTML = this.automated ? "Toggle off" : "Toggle on";
+    //     this.automate_button.classList = (this.automated ? "active" : "inactive");
     // }
 }
 
-const Wood = new Resources("Wood", base_value = 0.5);
-const Stone = new Resources("Stone", base_value=0.01);
+const Wood = new Resources("Wood", base_value = 0);
+Wood.value = 5;
+Wood.multiplier = 2;
+const Stone = new Resources("Stone", base_value = 0.01);
 const Water = new Resources("Water");
 const Iron = new Resources("Iron");
 const Coal = new Resources("Coal");

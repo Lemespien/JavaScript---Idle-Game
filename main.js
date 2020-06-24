@@ -8,15 +8,18 @@ let FIRST_GO = setInterval(() => {
 })
 
 let MAIN_INTERVAL = setInterval(() => {
-    for (resource in ALL_RESOURCES) {
-        if (ALL_RESOURCES[resource].automated) {
-            ALL_RESOURCES[resource].increase();
+    ALL_RESOURCES.forEach((resource) => {
+        if (resource.automated) resource.increase();
+    });
+
+    ALL_RECIPES.forEach((x) => {
+        if (!x.unlocked && x.haveResources()) {
+            console.log(x.resource);
+
+            x.unlockResource();
+            console.log("OH MY GOD IT WORKED");
+
         }
-    }
-    for (recipe in ALL_RECIPES) {
-        if (!ALL_RECIPES[recipe].unlocked && ALL_RECIPES[recipe].haveResources()) {
-            ALL_RECIPES[recipe].unlockResource();
-            console.log("OH MY GOSH IT WORKED");
-        }
-    }
+    });
+
 }, 250);

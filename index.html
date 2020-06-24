@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <button id="wood_gathering" onclick="Wood.increase()">Gather Wood</button>
+    <button id="wood_gathering" onclick="Wood.value++">Gather Wood</button>
     <div class="main_grid" style="visibility:hidden">
         <div class="menu">
             <button>Buildings</button>
@@ -66,7 +66,7 @@
                 "menu menu menu menu menu menu menu"
                 "resource_list main_zone main_zone main_zone main_zone main_zone main_zone";
             grid-template-columns: 28% repeat(6, 14%);
-            
+
         }
 
         .menu {
@@ -130,10 +130,11 @@
             height: 15px;
         }
 
-        #resource_list .row p{
+        #resource_list .row p {
             height: 15px;
             flex: 10%;
         }
+
         .resource_count.column {
             text-align: right;
             flex: auto !important;
