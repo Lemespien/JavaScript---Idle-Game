@@ -1,29 +1,22 @@
 let ALL_RESOURCES = new Map();
 
 class Resources {
-    constructor(name, base_value = 1, value = 0, automated = false) {
+    constructor(name, base_value = 0, value = 0, automated = false) {
         this.name = name;
         this.title_id = name.toLowerCase();
         this.count_id = name.toLowerCase() + "_count";
-        this.button_id = name.toLowerCase() + "_button";
-        this.automate_id = name.toLowerCase() + "_automate";
         this.automated = automated;
         this.base_value = base_value;
         this.value = value;
         this.increase_by = 1;
         this.buildings = {};
+        this.drains = new Map();
         this.other_bonuses = {};
         this.multiplier = 1;
-        this.building_div = null;
-        this.building_count_element = null;
-        this.building_button = null;
-        this.automate_button = null;
         this.title_element = null;
         this.count_element = null;
         this.unlocked = false;
         ALL_RESOURCES.set(this.name, this);
-        // ALL_RESOURCES[this.name] = this;
-        console.log(typeof (this));
     }
 
     createResourceCard() {
@@ -63,6 +56,15 @@ class Resources {
     }
 
     increase() {
+        if (this.increase_by < 0) {
+            let change = this.value + this.increase_by;
+            if (change < 0) {
+                this.drains.forEach((value, key) => {
+                    key.toggleAutomation();
+                });
+                this.updateBonuses();
+            }
+        }
         this.value += this.increase_by;
         this.updateCount();
     }
@@ -78,8 +80,12 @@ class Resources {
 
     updateBonuses() {
         const arrSum = arr => arr.reduce((a, b) => a + b, 0);
-        let building_bonuses = arrSum(Object.values(this.buildings));
-        if (building_bonuses > 0) {
+        const building_bonuses = arrSum(Object.values(this.buildings));
+        let drains = 0;
+        for (let value of this.drains.values()) {
+            drains += value;
+        }
+        if (building_bonuses > 0 || drains > 0) {
             this.automated = true;
         } else {
             this.automated = false;
@@ -87,24 +93,19 @@ class Resources {
         }
         let other_bonuses = arrSum(Object.values(this.other_bonuses));
         console.log(this.base_value, building_bonuses, other_bonuses);
-
-        this.increase_by = (this.base_value + building_bonuses + other_bonuses) * this.multiplier;
-        console.log(this.increase_by);
+        let total = (this.base_value + building_bonuses + other_bonuses) * this.multiplier - drains;
+        this.increase_by = total;
 
     }
-
-    // toggleAutomation() {
-    //     this.automated = !this.automated;
-    //     this.automate_button.innerHTML = this.automated ? "Toggle off" : "Toggle on";
-    //     this.automate_button.classList = (this.automated ? "active" : "inactive");
-    // }
 }
 
-const Wood = new Resources("Wood", base_value = 0);
-Wood.value = 5;
+const Wood = new Resources("Wood");
+Wood.value = 50000;
 Wood.multiplier = 2;
-const Stone = new Resources("Stone", base_value = 0.01);
+const Stone = new Resources("Stone");
+Stone.multiplier = 10;
 const Water = new Resources("Water");
 const Iron = new Resources("Iron");
+Iron.multiplier = 10;
 const Coal = new Resources("Coal");
 const Steel = new Resources("Steel");

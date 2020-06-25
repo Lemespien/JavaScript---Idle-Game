@@ -1,10 +1,11 @@
 let ALL_RECIPES = new Map();
 
 class Recipe {
-    constructor(name, resource, cost, cost_increase = 1.01, value = 1) {
+    constructor(name, resource, cost, cost_increase = 1.01, value = 1, drain = null) {
         this.name = name;
         this.resource = resource;
         this.cost = cost;
+        this.drain = drain;
         this.cost_increase = cost_increase;
         this.value = value;
         this.building_count = 0;
@@ -81,7 +82,6 @@ class Recipe {
         Object.keys(this.cost).map(element => {
             if (this.cost[element] <= ALL_RESOURCES.get(element).value)
                 count++;
-            console.log(element);
         });
         if (count >= Object.keys(this.cost).length) {
             if (this.building_count < 1) {
@@ -91,6 +91,7 @@ class Recipe {
             // recipe_resource.buildings[this.name] = this.building_count * this.value;
             if (this.automated) {
                 this.resource.buildings[this.name] = this.building_count * this.value;
+                this.addDrains();
                 recipe_resource.updateBonuses();
             }
             this.building_count_element.innerHTML = this.building_count + " X"
@@ -105,7 +106,6 @@ class Recipe {
                 this.cost[element] **= this.cost_increase;
                 console.log("new cost", this.cost[element]);
                 resource.updateCount();
-                console.log(element);
             });
         }
     }
@@ -130,12 +130,31 @@ class Recipe {
             this.resource.buildings[this.name] = this.building_count * this.value;
             this.automate_button.innerHTML = "Toggle off";
             this.automate_button.classList = "active";
+            this.addDrains();
         } else {
             this.resource.buildings[this.name] = 0;
             this.automate_button.innerHTML = "Toggle on";
             this.automate_button.classList = "inactive";
+            this.removeDrains();
         }
         this.resource.updateBonuses();
+    }
+
+    addDrains() {
+        if (this.drain) {
+            this.drain.forEach((value, key) => {
+                key.drains.set(this, value * this.building_count);
+                key.updateBonuses();
+            });
+        }
+    }
+    removeDrains() {
+        if (this.drain) {
+            this.drain.forEach((value, key) => {
+                key.drains.set(this, 0);
+                key.updateBonuses();
+            });
+        }
     }
 }
 
@@ -147,7 +166,7 @@ Lumberjacks_Hut = new Recipe(
     },
     cost_increase = 1.05,
     value = 2
-)
+);
 
 Wood_Cutter = new Recipe(
     "Wood Cutter",
@@ -157,7 +176,7 @@ Wood_Cutter = new Recipe(
     },
     cost_increase = 1.01,
     value = 0.5
-)
+);
 
 Stonemason = new Recipe(
     "Stonemason",
@@ -166,8 +185,8 @@ Stonemason = new Recipe(
         Wood: 15,
     },
     cost_increase = 1.05,
-    value = 0.01,
-)
+    value = 0.05,
+);
 
 Water_Well = new Recipe(
     "Water Well",
@@ -177,8 +196,8 @@ Water_Well = new Recipe(
         Stone: 10,
     },
     cost_increase = 1.05,
-
-)
+    value = 0.3
+);
 
 Iron_Mine = new Recipe(
     "Iron Mine",
@@ -188,5 +207,32 @@ Iron_Mine = new Recipe(
         Stone: 15
     },
     cost_increase = 1.05,
+    value = 0.01
+);
 
-)
+Coal_Mine = new Recipe(
+    "Coal Mine",
+    Coal,
+    cost = {
+        Wood: 100,
+        Stone: 150,
+        Iron: 15
+    },
+    cost_increase = 1.1,
+    value = 0.005
+);
+
+Steel_Foundry = new Recipe(
+    "Steel Foundry",
+    Steel,
+    cost = {
+        Wood: 50,
+        Stone: 25,
+    },
+    cost_increase = 1.15,
+    value = 0.01,
+    drain = new Map([
+        [Iron, 1],
+        [Coal, 0.2]
+    ]),
+);
