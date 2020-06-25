@@ -16,6 +16,10 @@ class Recipe {
         this.building_button = null;
         this.building_count_element = null;
         this.building_div = null;
+        this.defaultTooltip = null;
+        this.drainTooltip = null;
+        this.costText = null;
+        this.tooltip_span = null;
         this.automate_button = null;
         ALL_RECIPES.set(this.name, this);
         // ALL_RECIPES[resource] = this;
@@ -28,7 +32,7 @@ class Recipe {
         let resource = this.resource;
 
         let building_div = document.createElement("div");
-        building_div.classList.add("building_button", "column");
+        building_div.classList.add("building_button", "column", "tooltip");
         this.building_div = building_div;
 
         let building_count = document.createElement("p");
@@ -41,12 +45,58 @@ class Recipe {
             this.build();
         }, false);
         this.building_button = building_button;
+        let tooltip_span = this.createTooltip();
+
         building_button.append(document.createTextNode(`Build ${this.name}`));
         building_div.append(building_count);
         building_div.append(building_button);
-
+        building_div.append(tooltip_span);
         return building_div;
     }
+
+    createTooltip() {
+        let tooltip_span = document.createElement("span");
+        tooltip_span.classList.add("tooltiptext");
+
+        let defaultTooltip = document.createElement("p");
+        defaultTooltip.append(document.createTextNode(""));
+        this.defaultTooltip = defaultTooltip;
+
+        let drainTooltip = document.createElement("p");
+        drainTooltip.append(document.createTextNode(""));
+        this.drainTooltip = drainTooltip;
+
+        let costText = document.createElement("p");
+        costText.append(document.createTextNode(""));
+        this.costText = costText;
+        this.updateTooltip();
+        tooltip_span.append(defaultTooltip);
+        tooltip_span.append(drainTooltip);
+        tooltip_span.append(costText);
+        this.tooltip_span = tooltip_span;
+        return tooltip_span;
+    }
+
+    updateTooltip() {
+        if (this.drain) {
+            let drainsText = "Drains:\n";
+            this.drain.forEach((value, key) => {
+                drainsText += `${(value * this.building_count).toFixed(2)} ${key.name}\n`;
+            });
+            this.drainTooltip.innerHTML = drainsText;
+        }
+
+        let functionalityText = `Produces ${this.value} of ${this.resource.name} per building
+                                Total: ${(this.value * this.building_count).toFixed(2)}`;
+        this.defaultTooltip.innerHTML = functionalityText;
+
+        let resourceCostText = "";
+        for (let element in this.cost) {
+            resourceCostText += `${element}: ${this.cost[element].toFixed(2)}\n`;
+        }
+        this.costText.innerHTML = resourceCostText;
+    }
+
     createBuildingCard() {
         let resource_element = document.getElementById("buildings");
         let building_div = this.createBuildingButton();
@@ -107,6 +157,7 @@ class Recipe {
                 console.log("new cost", this.cost[element]);
                 resource.updateCount();
             });
+            this.updateTooltip();
         }
     }
 
@@ -158,24 +209,26 @@ class Recipe {
     }
 }
 
-Lumberjacks_Hut = new Recipe(
-    "Lumberjacks Hut",
-    Wood,
-    cost = {
-        Wood: 15,
-    },
-    cost_increase = 1.05,
-    value = 2
-);
 
 Wood_Cutter = new Recipe(
     "Wood Cutter",
     Wood,
     cost = {
-        Wood: 6,
+        Wood: 10,
     },
-    cost_increase = 1.01,
+    cost_increase = 1.1,
     value = 0.5
+);
+
+Lumberjacks_Hut = new Recipe(
+    "Lumberjacks Hut",
+    Wood,
+    cost = {
+        Wood: 15,
+        Stone: 20
+    },
+    cost_increase = 1.15,
+    value = 4
 );
 
 Stonemason = new Recipe(
@@ -184,7 +237,7 @@ Stonemason = new Recipe(
     cost = {
         Wood: 15,
     },
-    cost_increase = 1.05,
+    cost_increase = 1.1,
     value = 0.05,
 );
 
@@ -192,10 +245,10 @@ Water_Well = new Recipe(
     "Water Well",
     Water,
     cost = {
-        Wood: 5,
-        Stone: 10,
+        Wood: 10,
+        Stone: 5,
     },
-    cost_increase = 1.05,
+    cost_increase = 1.1,
     value = 0.3
 );
 
@@ -206,28 +259,30 @@ Iron_Mine = new Recipe(
         Wood: 50,
         Stone: 15
     },
-    cost_increase = 1.05,
-    value = 0.01
+    cost_increase = 1.1,
+    value = 0.02
 );
 
 Coal_Mine = new Recipe(
     "Coal Mine",
     Coal,
     cost = {
-        Wood: 100,
-        Stone: 150,
-        Iron: 15
+        Wood: 40,
+        Stone: 20,
     },
     cost_increase = 1.1,
-    value = 0.005
+    value = 0.01,
+    drain = new Map([
+        [Wood, 1]
+    ])
 );
 
 Steel_Foundry = new Recipe(
     "Steel Foundry",
     Steel,
     cost = {
-        Wood: 50,
-        Stone: 25,
+        Wood: 40,
+        Stone: 60,
     },
     cost_increase = 1.15,
     value = 0.01,

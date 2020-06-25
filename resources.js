@@ -100,12 +100,11 @@ class Resources {
 }
 
 const Wood = new Resources("Wood");
-Wood.value = 50000;
-Wood.multiplier = 2;
+Wood.value = 10;
+Wood.multiplier = 10;
 const Stone = new Resources("Stone");
-Stone.multiplier = 10;
+Stone.multiplier = 100;
 const Water = new Resources("Water");
 const Iron = new Resources("Iron");
-Iron.multiplier = 10;
 const Coal = new Resources("Coal");
 const Steel = new Resources("Steel");
