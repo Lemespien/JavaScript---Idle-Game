@@ -12,7 +12,7 @@ class Resources {
         this.buildings = {};
         this.drains = new Map();
         this.other_bonuses = {};
-        this.multiplier = 1;
+        this.multiplier = {"Base": 1};
         this.title_element = null;
         this.count_element = null;
         this.unlocked = false;
@@ -91,9 +91,12 @@ class Resources {
             this.automated = false;
             this.count_element.innerHTML = `${this.value.toFixed(2)}`;
         }
-        let other_bonuses = arrSum(Object.values(this.other_bonuses));
+        const other_bonuses = arrSum(Object.values(this.other_bonuses));
+        const multiplier = arrSum(Object.values(this.multiplier));
+        console.log(this.multiplier);
+        
         console.log(this.base_value, building_bonuses, other_bonuses);
-        let total = (this.base_value + building_bonuses + other_bonuses) * this.multiplier - drains;
+        const total = (this.base_value + building_bonuses + other_bonuses) * multiplier - drains;
         this.increase_by = total;
 
     }
@@ -101,9 +104,9 @@ class Resources {
 
 const Wood = new Resources("Wood");
 Wood.value = 10;
-Wood.multiplier = 10;
+Wood.multiplier["Awesome buff"] = 10;
 const Stone = new Resources("Stone");
-Stone.multiplier = 100;
+Stone.multiplier["Awesome buff"] = 100;
 const Water = new Resources("Water");
 const Iron = new Resources("Iron");
 const Coal = new Resources("Coal");

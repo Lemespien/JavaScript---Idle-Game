@@ -21,6 +21,8 @@ class Recipe {
         this.costText = null;
         this.tooltip_span = null;
         this.automate_button = null;
+        this.special_action = null;
+        this.special_action_is_triggered = false;
         ALL_RECIPES.set(this.name, this);
         // ALL_RECIPES[resource] = this;
     }
@@ -157,6 +159,7 @@ class Recipe {
                 console.log("new cost", this.cost[element]);
                 resource.updateCount();
             });
+            if (this.special_action) this.special_action();
             this.updateTooltip();
         }
     }
@@ -291,3 +294,23 @@ Steel_Foundry = new Recipe(
         [Coal, 0.2]
     ]),
 );
+
+Iron_Refinery = new Recipe(
+    "Iron Refinery",
+    Iron,
+    cost = {
+        Wood: 500,
+        Steel: 5,
+    },
+    cost_increase = 1.05,
+    value = 0
+)
+
+/* SPECIAL ACTIONS */
+Steel_Foundry.special_action = function() {
+    this.resource.multiplier[this.name] = 1 + this.building_count * 0.01;
+}
+
+Iron_Refinery.special_action = function() {
+    this.resource.multiplier[this.name] = 1 + this.building_count * 0.2;
+}
